@@ -26,7 +26,7 @@ func evalExpr(r io.ReadSeeker, e expr) (float64, error) {
 		if err != nil {
 			return 0, nil
 		}
-		i, err := strconv.Atoi(t)
+		i, err := strconv.ParseFloat(t, 64)
 		if err != nil {
 			return 0, nil
 		}

@@ -108,5 +108,26 @@ func (t *tokenStream) tokNumber(_ byte) (token, error) {
 		}
 		t.nextByte()
 	}
+	ch, err := t.peekByte()
+	if err != nil {
+		return t.newToken(Number), nil
+	}
+	if ch == '.' {
+		t.nextByte() // '.'
+		ch, err := t.peekByte()
+		if err != nil || !unicode.IsNumber(rune(ch)) {
+			return token{}, errBadTok
+		}
+		for {
+			ch, err := t.peekByte()
+			if err != nil {
+				break
+			}
+			if !unicode.IsNumber(rune(ch)) {
+				break
+			}
+			t.nextByte()
+		}
+	}
 	return t.newToken(Number), nil
 }
