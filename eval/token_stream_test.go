@@ -53,6 +53,35 @@ func TestTokenStream_Peek(t *testing.T) {
 	assert.NoError(t, err, "Peek should not return an error")
 }
 
+func TestTokenStream_Number(t *testing.T) {
+	tests := []struct {
+		input    string
+		hasError bool
+	}{
+		{"12", false},
+		{"0", false},
+		{"1.2", false},
+		{"1.0002", false},
+		{"000", false},
+
+		{"1.", true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			reader := strings.NewReader(tc.input)
+			ts := newTokenStream(reader)
+			tok, err := ts.next()
+			if tc.hasError {
+				assert.Error(t, err, "Expected an error for input: %s", tc.input)
+			} else {
+				assert.NoError(t, err, "Did not expect an error for input: %s", tc.input)
+				assert.Equal(t, tok.k, Number, "Unexpected result for input: %s", tc.input)
+			}
+		})
+	}
+}
+
 func TestTokenStream_EOF(t *testing.T) {
 	input := ""
 	reader := strings.NewReader(input)

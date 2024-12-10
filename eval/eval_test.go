@@ -18,11 +18,13 @@ func TestEval(t *testing.T) {
 
 		{"+42", 42, false},
 		{"-42", -42, false},
+		{"1.1", 1.1, false},
 
 		{"1 + 1", 2, false},
 		{"10 - 5", 5, false},
 		{"2 * 3", 6, false},
 		{"8 / 2", 4, false},
+		{"8.5 / 2", 4.25, false},
 
 		{"1 + 2 * 3", 7, false},
 		{"(1 + 2) * 3", 9, false},
