@@ -1,18 +1,25 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"log"
-	"strings"
+	"os"
 
 	"github.com/caiquetorres/calculator/eval"
 )
 
 func main() {
-	input := strings.NewReader("1 + 2")
-	res, err := eval.Eval(input)
-	if err != nil {
-		log.Fatal(err)
+	reader := bufio.NewScanner(os.Stdin)
+	fmt.Print("> ")
+	for reader.Scan() {
+		input := bytes.NewReader(reader.Bytes())
+		res, err := eval.Eval(input)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(fmt.Sprintf("%f", res))
+		}
+		fmt.Print("> ")
 	}
-	fmt.Println(fmt.Sprintf("Res: %f", res))
 }
