@@ -8,8 +8,10 @@ To build and run the tool, use the following commands:
 ```sh
 # Build the project
 make build
-```
 
+# Run the project
+make run
+```
 
 ## Test
 

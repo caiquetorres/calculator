@@ -70,7 +70,7 @@ func evalExpr(r io.ReadSeeker, e expr) (float64, error) {
 			return left * right, nil
 		case "/":
 			if right == 0 {
-				return 0, fmt.Errorf("invalid division bg=y 0")
+				return 0, fmt.Errorf("invalid division by 0")
 			}
 			return left / right, nil
 		}
