@@ -19,6 +19,7 @@ func TestEval(t *testing.T) {
 		{"+42", 42, false},
 		{"-42", -42, false},
 		{"1.1", 1.1, false},
+		{"-1.1", -1.1, false},
 
 		{"1 + 1", 2, false},
 		{"10 - 5", 5, false},
@@ -38,6 +39,7 @@ func TestEval(t *testing.T) {
 		{"2 ** 3", 0, true},
 		{"1 +", 0, true},
 		{"1 + 2 3", 0, true},
+		{"1 + 2 *", 0, true},
 	}
 
 	for _, tc := range tests {
