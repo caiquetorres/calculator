@@ -6,19 +6,6 @@ import (
 
 type exprKind byte
 
-func (e exprKind) string() string {
-	switch e {
-	case Literal:
-		return "literal"
-	case Unary:
-		return "unary"
-	case Binary:
-		return "binary"
-	default:
-		return "unkdown"
-	}
-}
-
 const (
 	Literal exprKind = iota
 	Unary
@@ -31,8 +18,12 @@ type expr interface {
 
 type literalExpr struct {
 	v token
+}
 
-	k exprKind
+func newLiteralExpr(v token) *literalExpr {
+	return &literalExpr{
+		v: v,
+	}
 }
 
 func (l *literalExpr) kind() exprKind {
@@ -42,8 +33,13 @@ func (l *literalExpr) kind() exprKind {
 type unaryExpr struct {
 	op token
 	e  expr
+}
 
-	k exprKind
+func newUnaryExpr(op token, e expr) *unaryExpr {
+	return &unaryExpr{
+		op: op,
+		e:  e,
+	}
 }
 
 func (l *unaryExpr) kind() exprKind {
@@ -54,8 +50,14 @@ type binaryExpr struct {
 	l  expr
 	op token
 	r  expr
+}
 
-	k exprKind
+func newBinaryExpr(l expr, op token, r expr) *binaryExpr {
+	return &binaryExpr{
+		l:  l,
+		op: op,
+		r:  r,
+	}
 }
 
 func (l *binaryExpr) kind() exprKind {
@@ -68,9 +70,9 @@ func parse(r io.Reader) (expr, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = p.peek()
+	tok, err := p.peek()
 	if err == nil {
-		return nil, errUnexpectedTok
+		return nil, newCompileError("expression expected", tok.s)
 	}
 	return e, nil
 }
@@ -104,11 +106,7 @@ func parseTerm(p *parseStream) (expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		left = &binaryExpr{
-			l:  left,
-			op: op,
-			r:  right,
-		}
+		left = newBinaryExpr(left, op, right)
 	}
 	return left, nil
 }
@@ -134,11 +132,7 @@ func parseFactor(p *parseStream) (expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		left = &binaryExpr{
-			l:  left,
-			op: op,
-			r:  right,
-		}
+		left = newBinaryExpr(left, op, right)
 	}
 	return left, nil
 }
@@ -146,7 +140,7 @@ func parseFactor(p *parseStream) (expr, error) {
 func parseUnary(p *parseStream) (expr, error) {
 	tok, err := p.peek()
 	if err != nil {
-		return nil, errExpressionExpected
+		return nil, newCompileError("expression expected", tok.s)
 	}
 	if tok.k != Plus && tok.k != Minus {
 		return parseLit(p)
@@ -156,10 +150,7 @@ func parseUnary(p *parseStream) (expr, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &unaryExpr{
-		op: tok,
-		e:  expr,
-	}, nil
+	return newUnaryExpr(tok, expr), nil
 }
 
 func parseLit(p *parseStream) (expr, error) {
@@ -169,15 +160,12 @@ func parseLit(p *parseStream) (expr, error) {
 	}
 	switch tok.k {
 	case Number:
-		return &literalExpr{
-			v: tok,
-			k: Literal,
-		}, nil
+		return newLiteralExpr(tok), nil
 	case LeftParen:
 		expr, err := parseExpression(p)
 		if err != nil {
 			if err == io.EOF {
-				return nil, errExpressionExpected
+				return nil, newCompileError("expression expected", tok.s)
 			}
 			return nil, err
 		}
@@ -187,6 +175,6 @@ func parseLit(p *parseStream) (expr, error) {
 		}
 		return expr, nil
 	default:
-		return nil, errExpressionExpected
+		return nil, newCompileError("expression expected", tok.s)
 	}
 }

@@ -2,12 +2,9 @@ package eval
 
 import (
 	"bufio"
-	"errors"
 	"io"
 	"unicode"
 )
-
-var errBadTok = errors.New("bad token")
 
 type tokenStream struct {
 	c   token
@@ -55,7 +52,7 @@ func (t *tokenStream) get() (token, error) {
 	t.s = t.ptr
 	ch, err := t.nextByte()
 	if err != nil {
-		return token{}, err
+		return t.newToken(Bad), err
 	}
 	switch ch {
 	case '+':
@@ -74,14 +71,17 @@ func (t *tokenStream) get() (token, error) {
 		if unicode.IsNumber(rune(ch)) {
 			return t.tokNumber(ch)
 		} else {
-			return token{}, errBadTok
+			return t.newToken(Bad), newCompileError("bad token", t.newSpan())
 		}
 	}
 }
 
+func (t *tokenStream) newSpan() Span {
+	return Span{s: uint32(t.s), l: uint16(t.ptr - t.s)}
+}
+
 func (t *tokenStream) newToken(kind tokenKind) token {
-	span := span{s: uint32(t.s), l: uint16(t.ptr - t.s)}
-	return token{s: span, k: kind}
+	return token{s: t.newSpan(), k: kind}
 }
 
 func (t *tokenStream) skipWhitespace() {
@@ -116,7 +116,7 @@ func (t *tokenStream) tokNumber(_ byte) (token, error) {
 		t.nextByte() // '.'
 		ch, err := t.peekByte()
 		if err != nil || !unicode.IsNumber(rune(ch)) {
-			return token{}, errBadTok
+			return t.newToken(Bad), newCompileError("bad token", t.newSpan())
 		}
 		for {
 			ch, err := t.peekByte()

@@ -18,7 +18,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(fmt.Sprintf("%f", res))
+			fmt.Println(res)
 		}
 		fmt.Print("> ")
 	}

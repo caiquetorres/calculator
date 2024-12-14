@@ -20,6 +20,8 @@ func (t tokenKind) string() string {
 		return "left parenthesis"
 	case RightParen:
 		return "right parenthesis"
+	case Bad:
+		return "bad"
 	default:
 		return "unknown"
 	}
@@ -35,11 +37,13 @@ const (
 
 	LeftParen
 	RightParen
+
+	Bad
 )
 
 type token struct {
 	k tokenKind
-	s span
+	s Span
 }
 
 func (t *token) textContent(r io.ReadSeeker) (string, error) {

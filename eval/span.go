@@ -1,13 +1,19 @@
 package eval
 
-import "io"
+import (
+	"io"
+)
 
-type span struct {
+type Span struct {
 	s uint32
 	l uint16
 }
 
-func (s *span) textContent(r io.ReadSeeker) (string, error) {
+func (s *Span) Start() uint32 {
+	return s.s
+}
+
+func (s *Span) textContent(r io.ReadSeeker) (string, error) {
 	buf := make([]byte, s.l)
 	_, err := r.Seek(int64(s.s), io.SeekStart)
 	if err != nil {

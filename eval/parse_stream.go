@@ -1,14 +1,8 @@
 package eval
 
 import (
-	"errors"
 	"fmt"
 	"io"
-)
-
-var (
-	errUnexpectedTok      = errors.New("unexpected token")
-	errExpressionExpected = errors.New("expression expected")
 )
 
 type parseStream struct {
@@ -32,7 +26,8 @@ func (p *parseStream) next() (token, error) {
 func (p *parseStream) expect(k tokenKind) (token, error) {
 	tok, err := p.t.next()
 	if err != nil || tok.k != k {
-		return token{}, fmt.Errorf("expected %s", k.string())
+		msg := fmt.Sprintf("expected %s", k.string())
+		return tok, newCompileError(msg, tok.s)
 	}
 	return tok, nil
 }
